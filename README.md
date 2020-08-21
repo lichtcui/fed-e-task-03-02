@@ -1,5 +1,4 @@
 # 一、简答题
-
 #### 1、请简述 Vue 首次渲染的过程。
 - Vue 初始化，实例成员，静态成员
 - new Vue()
@@ -83,21 +82,27 @@ Watcher
   - 触发 updated 钩子函数
 
 #### 3、请简述虚拟 DOM 中 Key 的作用和好处。
-patch.js > updateChildren > sameVnode() 判断新老节点差异，会首先进行 key 值判断
-
-- 没有设置 key 的时候  
-会进行
-三次 DOM 操作，插入一个 DOM，对比新老节点差异更新 VDOM，判断文本节点，
-
-- 设置 key 的时候  
-一次 DOM 操作，遇到不相等的值会从后往前遍历，相等的项不会更新 DOM，对新增项进行插入操作
-
-调用 patchVnode 之前，会首先调用 sameVnode()判断当前的新老 VNode 是否是相同节点，sameVnode() 中会首先判断 key 是否相同。
-
-- 当没有设置 key 的时候  
-  在 updateChildren 中比较子节点的时候，会做三次更新 DOM 操作和一次插入 DOM 的操作
-- 当设置 key 的时候  
-  在 updateChildren 中比较子节点的时候，因为 oldVnode 的子节点的 b,c,d 和 newVnode 的 x,b,c 的 key 相同，所以只做比较，没有更新 DOM 的操作，当遍历完毕后，会再把 x 插入到 DOM 上DOM 操 作只有一次插入操作
+作用：判断新老节点是否相同
+好处：减少 vdom 操作，提高性能
 
 #### 4、请简述 Vue 中模板编译的过程。
-  
+- compileToFunctions
+  - 先从缓存中加载编译好的 render 函数
+  - 缓存中没有调用 compile 开始编译
+- compile(template, options)
+  - 合并 options
+  - 调用 baseCompile 编译模版
+- baseCompile(template.trim(), finalOptions)
+  - parse()  
+    把模版字符串 template 转换成抽象语法树 AST tree  
+  - optimize()  
+    标记 AST tree 中的静态根节点 sub trees  
+    sub trees 不需要在每次重新渲染的时候重新生成节点  
+    patch 阶段跳过 sub trees
+  - generate()  
+    AST tree 生成 js 的创建代码  
+- compileToFunctions(template, ...)  
+  继续把上一步中生成的字符串形式 js 代码转换为函数  
+  createFunction()  
+  render 和 staticRenderFns 初始化完毕  
+  挂载到 Vue 实例的 options 对应的属性中  
